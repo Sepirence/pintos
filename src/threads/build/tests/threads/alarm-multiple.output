@@ -1,0 +1,28 @@
+Writing command line to /tmp/RE61xCfCA8.dsk...
+warning: can't find squish-pty, so terminal input will fail
+bochs -q
+Kernel command line: -q run alarm-multiple
+Pintos booting with 4,096 kB RAM...
+375 pages available in kernel pool.
+374 pages available in user pool.
+Calibrating timer...  204,600 loops/s.
+Boot complete.
+Executing 'alarm-multiple':
+(alarm-multiple) begin
+(alarm-multiple) Creating 5 threads to sleep 7 times each.
+(alarm-multiple) Thread 0 sleeps 10 ticks each time,
+(alarm-multiple) thread 1 sleeps 20 ticks each time, and so on.
+(alarm-multiple) If successful, product of iteration count and
+(alarm-multiple) sleep duration will appear in nondescending order.
+Kernel PANIC at ../../threads/thread.c:215 in thread_block(): assertion `intr_get_level () == INTR_OFF' failed.
+Call stack: 0xc0117f50Interrupt 0x0e (#PF Page-Fault Exception) at eip=0xc01051f2
+ cr2=000000d7 error=00000000
+ eax=000000d7 ebx=000000d7 ecx=c0117e7c edx=000003d4
+ esi=c010b8ba edi=c010c7d6 esp=c010d35b ebp=c0117f10
+ cs=0008 ds=0010 es=0010 ss=7f50
+Kernel PANIC recursion at ../../threads/interrupt.c:373 in intr_handler().
+Timer: 65 ticks
+Thread: 0 idle ticks, 65 kernel ticks, 0 user ticks
+Console: 1066 characters output
+Keyboard: 0 keys pressed
+Powering off...
