@@ -99,21 +99,24 @@ void
 timer_sleep (int64_t ticks)
 {
   int64_t start = timer_ticks ();
+  enum intr_level old_level;
   struct thread *current = thread_current();
 
   struct list *cur_sleep = get_sleep_list();
   current->wake_tick = start+ticks;
   list_push_back (&cur_sleep, &current->elem);
   current->status = THREAD_BLOCKED;
-  schedule();
+
+  thread_block();
+  intr_set_level (old_level);
+
 }
 
 void
 timer_wakeup(void)
 {
-  struct thread tmp;
+  struct thread *tmp;
   struct list *cur_sleep = get_sleep_list();
-  struct list_elem
 
   list_sort(cur_sleep,sort_with_tick,NULL);
 
@@ -123,7 +126,7 @@ timer_wakeup(void)
 
     if(tmp->wake_tick > ticks)
     {
-      thread_unblock(tmp);
+      thread_unblock(&tmp);
     }
     else
     {
@@ -133,13 +136,13 @@ timer_wakeup(void)
   }
 }
 
-bool sort_with_tick(struct list_elem *first_elem, struct list_elem *second_elem, void* aux)
+static bool sort_with_tick(const struct list_elem *first_elem,const struct list_elem *second_elem, void *aux)
 {
-  struct thread *first = list_entry(first_elem,struct thread, elem);
+  struct thread *first = list_entry(first_elem,struct thread,elem);
   struct thread *second = list_entry(second_elem,struct thread,elem);
 
-  if(first->wake_tick > second->wake_tick)  return true;
-  else  return false;
+  return first->wake_tick > second->wake_tick;
+
 }
 
 
