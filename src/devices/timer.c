@@ -7,6 +7,7 @@
 #include "threads/io.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "lib/kernel/list.h"
   
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -99,21 +100,12 @@ timer_sleep (int64_t ticks)
 {
   int64_t start = timer_ticks ();
   struct thread *current = thread_current();
-  enum intr_level old_level;
   
   struct list *cur_sleep = get_sleep_list();
-  current->tick_sleep = start + ticks;
-
-  
-
-  
-  ASSERT (intr_get_level () == INTR_ON);
-
-  
-  thread_block();
-  intr_set_level(old_level);
-
-  
+  current->wake_tick = start+ticks;
+  list_push_back (&cur_sleep, &current->elem);
+  current->status = THREAD_BLOCKED;
+  schedule();
 }
 
 void

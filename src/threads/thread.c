@@ -222,17 +222,6 @@ thread_block (void)
   schedule ();
 }
 
-void
-thread_sleep (void)
-{
-  ASSERT (!intr_context());
-  ASSERT (intr_get_level() == INTR_OFF);
-  
-  if(len(sleep_list) != 0)
-
-  
-}
-
 /* Transitions a blocked thread T to the ready-to-run state.
    This is an error if T is not blocked.  (Use thread_yield() to
    make the running thread ready.)
