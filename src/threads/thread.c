@@ -28,7 +28,7 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
-
+// For prject1
 static struct list sleep_list;
 
 /* Idle thread. */
@@ -94,6 +94,7 @@ thread_init (void)
 
   lock_init (&tid_lock);
   list_init (&ready_list);
+  list_init (&sleep_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -569,3 +570,13 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+struct list *get_sleep_list(void)
+{
+  return &sleep_list;
+}
+
+bool sleep_list_sort(struct list_elem* cand_elem, struct list_elem* cur_elem, void* aux)
+{
+  struct t
+}

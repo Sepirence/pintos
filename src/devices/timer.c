@@ -98,12 +98,20 @@ void
 timer_sleep (int64_t ticks) 
 {
   int64_t start = timer_ticks ();
+  struct thread *current = thread_current();
+  enum intr_level old_level;
+  
+  struct list *cur_sleep = get_sleep_list();
+  current->tick_sleep = start + ticks;
+
+  
+
   
   ASSERT (intr_get_level () == INTR_ON);
- // while (timer_elapsed (start) < ticks) 
-   // thread_yield ();
-  thread_block();
 
+  
+  thread_block();
+  intr_set_level(old_level);
 
   
 }
