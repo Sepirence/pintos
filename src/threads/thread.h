@@ -90,7 +90,7 @@ struct thread
     int priority;                       /* Priority. */
     int64_t wake_tick;
 
-r   /* Shared between thread.c and synch.c. */
+   /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
 #ifdef USERPROG
