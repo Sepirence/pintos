@@ -241,7 +241,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  list_insert_ordered (&ready_list, &t->elem, sort_with_priority,0);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -309,7 +309,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (curr != idle_thread)
-    list_push_back (&ready_list, &curr->elem);
+    list_insert_ordered (&ready_list, &curr->elem,sort_with_priority,0);
   curr->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -320,6 +320,7 @@ void
 thread_set_priority (int new_priority)
 {
   thread_current ()->priority = new_priority;
+  priority_yield();
 }
 
 /* Returns the current thread's priority. */
@@ -568,12 +569,13 @@ int64_t get_next_tick_to_wake(void)
 	return next_tick_to_wake;
 }
 
+//Project 1 - ALARM CLOCK
 void
 thread_sleep (int64_t ticks)
 {
   enum intr_level old_level;
      old_level = intr_disable();
-     
+
      struct thread *current =  thread_current();
      current->wake_tick = ticks;
      update_next_tick_to_wake(ticks);
@@ -605,6 +607,30 @@ thread_wakeup(int64_t ticks)
           }
      }
 }
+
+//PROJECT 2 - PRIORITY SCHEDULING
+
+bool sort_with_priority(const struct list_elem *first_elem,const struct list_elem *second_elem, void *aux UNUSED)
+{
+  struct thread *first = list_entry(first_elem,struct thread,elem);
+  struct thread *second = list_entry(second_elem,struct thread,elem);
+
+  return first->priority > second->priority;
+
+}
+
+void
+priority_yield(void)
+{
+  if(!list_empty(&ready_list))
+  {
+    struct thread *first = list_entry(list_front(&ready_list),struct thread, elem);
+    if (first->priority>thread_current()->priority)
+      thread_yield();
+  }
+}
+
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
