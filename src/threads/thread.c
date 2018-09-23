@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "devices/timer.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -30,6 +31,7 @@ static struct list ready_list;
 
 // For prject1
 static struct list sleep_list;
+static int64_t next_tick_to_wake;
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -554,12 +556,55 @@ allocate_tid (void)
 
   return tid;
 }
-
+
+void update_next_tick_to_wake(int64_t ticks)
+{
+	if (next_tick_to_wake > ticks)
+		next_tick_to_wake = ticks;
+}
+
+int64_t get_next_tick_to_wake(void)
+{
+	return next_tick_to_wake;
+}
+
+void
+thread_sleep (int64_t ticks)
+{
+  enum intr_level old_level;
+     old_level = intr_disable();
+     
+     struct thread *current =  thread_current();
+     current->wake_tick = ticks;
+     update_next_tick_to_wake(ticks);
+
+     list_push_back (&sleep_list, &current->elem);
+
+     thread_block();
+     intr_set_level (old_level);
+}
+
+void
+thread_wakeup(int64_t ticks)
+{
+     next_tick_to_wake = INT64_MAX;
+     struct thread *tmp;
+     struct list_elem *e;
+   e = list_begin(&sleep_list);
+     while(e != list_end(&sleep_list)){
+          tmp = list_entry(e, struct thread, elem);
+          if(ticks>tmp->wake_tick)
+          {
+               e = list_remove(&tmp->elem);
+               thread_unblock(tmp);
+          }
+          else
+          {
+               e = list_next(e);
+               update_next_tick_to_wake(tmp->wake_tick);
+          }
+     }
+}
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
-
-struct list *get_sleep_list(void)
-{
-  return &sleep_list;
-}

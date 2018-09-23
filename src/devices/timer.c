@@ -95,43 +95,37 @@ timer_elapsed (int64_t then)
 }
 
 /* Suspends execution for approximately TICKS timer ticks. */
+
 void
 timer_sleep (int64_t ticks)
 {
-  int64_t start = timer_ticks ();
-  enum intr_level old_level;
-  struct thread *current = thread_current();
-
-  struct list *cur_sleep = get_sleep_list();
-  current->wake_tick = start+ticks;
-  list_push_back (&cur_sleep, &current->elem);
-  current->status = THREAD_BLOCKED;
-
-  thread_block();
-  intr_set_level (old_level);
-
+	int64_t start = timer_ticks();
+	thread_sleep(start+ticks);
 }
 
+/*
 void
 timer_wakeup(void)
 {
   struct thread *tmp;
-  struct list *cur_sleep = get_sleep_list();
+  struct list_elem *e;
+  struct list *sleep_list = get_sleep_list();
 
-  list_sort(cur_sleep,sort_with_tick,NULL);
+  //list_sort(cur_sleep,sort_with_tick,NULL);
+  e = list_begin(&sleep_list);
 
-  while(!list_empty(cur_sleep))
+  while(e != list_end(&sleep_list))
   {
-    tmp = list_entry(list_pop_front(cur_sleep),struct thread,elem);
+    tmp = list_entry(e,struct thread,elem);
 
     if(tmp->wake_tick > ticks)
     {
-      thread_unblock(&tmp);
+      e = list_remove(&tmp->elem);
+      thread_unblock(tmp);
     }
     else
     {
-      list_push_front(&cur_sleep, &tmp->elem);
-      break;
+      e = list_next(e);
     }
   }
 }
@@ -144,7 +138,7 @@ static bool sort_with_tick(const struct list_elem *first_elem,const struct list_
   return first->wake_tick > second->wake_tick;
 
 }
-
+*/
 
 /* Suspends execution for approximately MS milliseconds. */
 void
@@ -179,8 +173,9 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
-  timer_wakeup();
   thread_tick ();
+	if(get_next_tick_to_wake() <= ticks)
+		thread_wakeup(ticks);
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
