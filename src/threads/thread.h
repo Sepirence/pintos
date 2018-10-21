@@ -95,7 +95,6 @@ struct thread
 
     int exit_error;
 
-    struct list child_proc;
     struct thread* parent;
 
     struct file *self;

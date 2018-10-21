@@ -160,7 +160,7 @@ process_wait (tid_t child_tid)
   struct child *ch=NULL;
   struct list_elem *e1=NULL;
 
-  for (e = list_begin (&thread_current()->child_proc); e != list_end (&thread_current()->child_proc);
+  for (e = list_begin (&thread_current()->childList); e != list_end (&thread_current()->childList);
          e = list_next (e))
       {
         struct child *f = list_entry (e, struct child, elem);
