@@ -187,7 +187,7 @@ thread_create (const char *name, int priority,
   c->tid = tid;
   c->exit_error = t->exit_error;
   c->used = false;
-  list_push_back (&running_thread()->child_proc, &c->elem);
+  list_push_back (&running_thread()->childList, &c->elem);
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack'
@@ -301,8 +301,8 @@ thread_exit (void)
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
 
-    while(!list_empty(&thread_current()->child_proc)){
-      struct proc_file *f = list_entry (list_pop_front(&thread_current()->child_proc), struct child, elem);
+    while(!list_empty(&thread_current()->childList)){
+      struct proc_file *f = list_entry (list_pop_front(&thread_current()->childList), struct child, elem);
       free(f);
     }
 
@@ -475,7 +475,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-  list_init (&t->child_proc);
+  list_init (&t->childList);
   t->parent = running_thread();
   list_init (&t->files);
   t->fd_count=2;
