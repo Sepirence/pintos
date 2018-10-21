@@ -51,7 +51,7 @@ process_execute (const char *file_name)
   free(f_name);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy);
-
+  thread_current()->alloc_fd = 2;
   sema_down(&thread_current()->child_lock);
 
   if(!thread_current()->success)
@@ -100,6 +100,11 @@ start_process (void *f_name)
   NOT_REACHED ();
 }
 
+static int
+allocate_fd(void)
+{
+  return thread_current()->alloc_fd++;
+}
 
 static bool
 is_parent_of(pid_t pid)
@@ -307,6 +312,17 @@ process_tell(int fd)
     return file_tell(newFd->file);
   else
     return -1;
+}
+
+void process_close(int fd)
+{
+  struct cell *newFd;
+  if((newFd = get_fd(fd))!=NULL)
+  {
+    file_close(newFd->file);
+    list_remove(&newFd->elem);
+    free(newFd);
+  }
 }
 /* We load ELF binaries.  The following definitions are taken
    from the ELF specification, [ELF1], more-or-less verbatim.  */

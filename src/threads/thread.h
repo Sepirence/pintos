@@ -110,6 +110,7 @@ struct thread
     uint32_t *pagedir;                  /* Page directory. */
     struct list fdList;
     struct list childList;
+    int alloc_fd;
 #endif
 
     /* Owned by thread.c. */

@@ -14,6 +14,7 @@ int process_read(int fd, void *buffer, unsigned size);
 int process_write(int fd, void *buffer, unsigned size);
 void process_seek(int fd, unsigned position);
 unsigned process_tell(int fd);
+void process_close(int fd);
 
 struct cell
 {
