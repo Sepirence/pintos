@@ -43,7 +43,7 @@ process_execute (const char *file_name)
 
   strlcpy (fn_copy, file_name, PGSIZE);
   f_name = malloc(strlen(file_name)+1);
-  strlcpy (f_name,file_name,strlen(file_name)+1)
+  strlcpy (f_name,file_name,strlen(file_name)+1);
   f_name = strtok_r (f_name," ",&save_ptr);
 
   /* Create a new thread to execute FILE_NAME. */
@@ -201,7 +201,7 @@ process_exit (void)
 
   acquire_filesys_lock();
   file_close(thread_current()->self);
-  close_all_files(&thread_current->files);
+  close_all_files(&thread_current()->files);
   release_filesys_lock();
 
 
