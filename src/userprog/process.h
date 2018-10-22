@@ -21,7 +21,10 @@ struct cell
   int fd;
   struct file *file;
   struct list_elem elem;
+  int opener;
 };
+
+struct list openfile_list;
 
 struct process_pid
 {
