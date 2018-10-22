@@ -7,7 +7,6 @@
 #include "threads/io.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
-#include "lib/kernel/list.h"
 
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -29,7 +28,6 @@ static intr_handler_func timer_interrupt;
 static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
-static struct semaphore *S;
 
 /* Sets up the 8254 Programmable Interval Timer (PIT) to
    interrupt PIT_FREQ times per second, and registers the
@@ -95,50 +93,15 @@ timer_elapsed (int64_t then)
 }
 
 /* Suspends execution for approximately TICKS timer ticks. */
-
 void
 timer_sleep (int64_t ticks)
 {
-	int64_t start = timer_ticks();
-	thread_sleep(start+ticks);
+  int64_t start = timer_ticks ();
+
+  ASSERT (intr_get_level () == INTR_ON);
+  while (timer_elapsed (start) < ticks)
+    thread_yield ();
 }
-
-/*
-void
-timer_wakeup(void)
-{
-  struct thread *tmp;
-  struct list_elem *e;
-  struct list *sleep_list = get_sleep_list();
-
-  //list_sort(cur_sleep,sort_with_tick,NULL);
-  e = list_begin(&sleep_list);
-
-  while(e != list_end(&sleep_list))
-  {
-    tmp = list_entry(e,struct thread,elem);
-
-    if(tmp->wake_tick > ticks)
-    {
-      e = list_remove(&tmp->elem);
-      thread_unblock(tmp);
-    }
-    else
-    {
-      e = list_next(e);
-    }
-  }
-}
-
-static bool sort_with_tick(const struct list_elem *first_elem,const struct list_elem *second_elem, void *aux)
-{
-  struct thread *first = list_entry(first_elem,struct thread,elem);
-  struct thread *second = list_entry(second_elem,struct thread,elem);
-
-  return first->wake_tick > second->wake_tick;
-
-}
-*/
 
 /* Suspends execution for approximately MS milliseconds. */
 void
@@ -174,8 +137,6 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
   thread_tick ();
-	if(get_next_tick_to_wake() <= ticks)
-		thread_wakeup(ticks);
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
@@ -218,7 +179,7 @@ real_time_sleep (int64_t num, int32_t denom)
   /* Convert NUM/DENOM seconds into timer ticks, rounding down.
 
         (NUM / DENOM) s
-     ---------------------- = NUM * TIMER_FREQ / DENOM ticks.
+     ---------------------- = NUM * TIMER_FREQ / DENOM ticks. 
      1 s / TIMER_FREQ ticks
   */
   int64_t ticks = num * TIMER_FREQ / denom;

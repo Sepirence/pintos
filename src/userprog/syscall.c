@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <syscall-nr.h>
-#include "devices/shutdown.h"
 #include "filesys/filesys.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
@@ -59,7 +58,7 @@ syscall_handler(struct intr_frame *f)
 static void
 syscall_halt(void)
 {
-  shutdown();
+  power_off();
 }
 
 static int

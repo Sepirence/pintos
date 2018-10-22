@@ -70,7 +70,7 @@ static void init_thread (struct thread *, const char *name, int priority);
 static bool is_thread (struct thread *) UNUSED;
 static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
-void thread_schedule_tail (struct thread *prev);
+void schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 
 /* Initializes the threading system by transforming the code
@@ -299,7 +299,7 @@ thread_exit (void)
 
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
-     when it calls thread_schedule_tail(). */
+     when it calls schedule_tail(). */
 
     while(!list_empty(&thread_current()->childList)){
       struct proc_file *f = list_entry (list_pop_front(&thread_current()->childList), struct child, elem);
@@ -527,7 +527,7 @@ next_thread_to_run (void)
    After this function and its caller returns, the thread switch
    is complete. */
 void
-thread_schedule_tail (struct thread *prev)
+schedule_tail (struct thread *prev)
 {
   struct thread *cur = running_thread ();
 
@@ -560,7 +560,7 @@ thread_schedule_tail (struct thread *prev)
    the running process's state must have been changed from
    running to some other state.  This function finds another
    thread to run and switches to it.
-   It's not safe to call printf() until thread_schedule_tail()
+   It's not safe to call printf() until schedule_tail()
    has completed. */
 static void
 schedule (void)
@@ -575,7 +575,7 @@ schedule (void)
 
   if (cur != next)
     prev = switch_threads (cur, next);
-  thread_schedule_tail (prev);
+  schedule_tail (prev);
 }
 
 void acquire_filesys_lock()

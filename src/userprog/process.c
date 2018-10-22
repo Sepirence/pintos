@@ -199,14 +199,14 @@ process_exit (void)
   uint32_t *pd;
 
   if(curr->exit_error==-100)
-    exit_proc(-1);
+    thread_exit();
 
   int exit_code = curr->exit_error;
   printf("%s: exit(%d)\n",curr->name,exit_code);
 
   acquire_filesys_lock();
   file_close(thread_current()->self);
-  close_all_files(&thread_current()->files);
+  process_close_all();
   release_filesys_lock();
 
 
@@ -314,7 +314,8 @@ process_tell(int fd)
     return -1;
 }
 
-void process_close(int fd)
+void
+process_close(int fd)
 {
   struct cell *newFd;
   if((newFd = get_fd(fd))!=NULL)
@@ -322,6 +323,19 @@ void process_close(int fd)
     file_close(newFd->file);
     list_remove(&newFd->elem);
     free(newFd);
+  }
+}
+
+void
+process_close_all(void)
+{
+  struct list *fds = &thread_current()->fdList;
+  struct list_elem *elem = list_begin(fds);
+  while(elem!= list_end(fds))
+  {
+    struct cell *tmp = list_entry(elem, struct cell, elem);
+    elem = list_next(elem);
+    process_close(tmp->fd);
   }
 }
 /* We load ELF binaries.  The following definitions are taken
